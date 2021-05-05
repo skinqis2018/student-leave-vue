@@ -207,10 +207,10 @@ export default {
   position: relative;
   top: 2px;
   display: inline-block;
-  width: 12rem;
+  width: 6rem;
   color: @heading-color;
   font-weight: 600;
-  font-size: 1.6rem;
+  font-size: .8rem;
   font-family: Avenir, "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
