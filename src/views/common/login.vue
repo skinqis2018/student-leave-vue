@@ -8,7 +8,7 @@
 						<span class="title">太工请销假系统</span>
 					</a>
 				</div>
-				<div class="desc">本工程仅作为毕设演示使用</div>
+				<div class="desc"></div>
 			</div>
 			<div class="login-main">
 				<h3 class="login-title">管理员登录</h3>
