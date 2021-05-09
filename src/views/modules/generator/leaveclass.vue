@@ -35,6 +35,12 @@
         label="班级名">
       </el-table-column>
       <el-table-column
+        prop="unitName"
+        header-align="center"
+        align="center"
+        label="院系名">
+      </el-table-column>
+      <el-table-column
         prop="createTime"
         header-align="center"
         align="center"

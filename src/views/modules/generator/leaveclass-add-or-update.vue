@@ -7,6 +7,16 @@
     <el-form-item label="班级名" prop="className">
       <el-input v-model="dataForm.className" placeholder="班级名"></el-input>
     </el-form-item>
+    <el-form-item label="院系" prop="className">
+      <el-select v-model="dataForm.unitId" placeholder="请选择" @change="changeHandle">
+        <el-option
+          v-for="item in options"
+          :key="item.unitId"
+          :label="item.unitName"
+          :value="item.unitId">
+        </el-option>
+      </el-select>
+    </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="visible = false">取消</el-button>
@@ -23,13 +33,27 @@
         dataForm: {
           classId: 0,
           className: '',
+          unitId: '',
+          unitName: ''
         },
         dataRule: {
           className: [
             { required: true, message: '班级名不能为空', trigger: 'blur' }
           ]
-        }
+        },
+        options: []
       }
+    },
+    created() {
+      this.$http({
+        url: this.$http.adornUrl(`/generator/leaveunit/list`),
+        method: 'get',
+        params: this.$http.adornParams()
+      }).then(({data}) => {
+        if (data && data.code === 0) {
+          this.options = data.page.list
+        }
+      })
     },
     methods: {
       init (id) {
@@ -45,6 +69,8 @@
             }).then(({data}) => {
               if (data && data.code === 0) {
                 this.dataForm.className = data.leaveClass.className
+                this.dataForm.unitId = data.leaveClass.unitId
+                this.dataForm.unitName = data.leaveClass.unitName
               }
             })
           }
@@ -60,6 +86,8 @@
               data: this.$http.adornData({
                 'classId': this.dataForm.classId || undefined,
                 'className': this.dataForm.className,
+                'unitId': this.dataForm.unitId,
+                'unitName': this.dataForm.unitName,
               })
             }).then(({data}) => {
               if (data && data.code === 0) {
@@ -78,6 +106,9 @@
             })
           }
         })
+      },
+      changeHandle(v) {
+        this.dataForm.unitName = this.options.find(i => i.unitId === v).unitName
       }
     }
   }

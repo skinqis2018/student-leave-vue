@@ -24,11 +24,25 @@
           <el-checkbox v-for="role in roleList" :key="role.roleId" :label="role.roleId">{{ role.roleName }}</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
-      <el-form-item label="状态" size="mini" prop="status">
-        <el-radio-group v-model="dataForm.status">
-          <el-radio :label="0">禁用</el-radio>
-          <el-radio :label="1">正常</el-radio>
-        </el-radio-group>
+      <el-form-item label="院系" prop="unitId">
+        <el-select v-model="dataForm.unitId" placeholder="请选择" @change="getClasses">
+          <el-option
+            v-for="item in unitOptions"
+            :key="item.unitId"
+            :label="item.unitName"
+            :value="item.unitId">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="班级" prop="classId">
+        <el-select v-model="dataForm.classId" placeholder="请选择">
+          <el-option
+            v-for="item in classOptions"
+            :key="item.classId"
+            :label="item.className"
+            :value="item.classId">
+          </el-option>
+        </el-select>
       </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -84,7 +98,8 @@
           email: '',
           mobile: '',
           roleIdList: [],
-          status: 1
+          status: 1,
+          classId: ''
         },
         dataRule: {
           userName: [
@@ -104,7 +119,9 @@
             { required: true, message: '手机号不能为空', trigger: 'blur' },
             { validator: validateMobile, trigger: 'blur' }
           ]
-        }
+        },
+        unitOptions: [],
+        classOptions: []
       }
     },
     methods: {
@@ -135,10 +152,12 @@
                 this.dataForm.mobile = data.user.mobile
                 this.dataForm.roleIdList = data.user.roleIdList
                 this.dataForm.status = data.user.status
+                this.dataForm.classId = data.user.classId
               }
             })
           }
         })
+        this.getUnits()
       },
       // 表单提交
       dataFormSubmit () {
@@ -155,7 +174,8 @@
                 'email': this.dataForm.email,
                 'mobile': this.dataForm.mobile,
                 'status': this.dataForm.status,
-                'roleIdList': this.dataForm.roleIdList
+                'roleIdList': this.dataForm.roleIdList,
+                'classId': this.dataForm.classId
               })
             }).then(({data}) => {
               if (data && data.code === 0) {
@@ -172,6 +192,32 @@
                 this.$message.error(data.msg)
               }
             })
+          }
+        })
+      },
+      getUnits() {
+        this.$http({
+          url: this.$http.adornUrl(`/generator/leaveunit/list`),
+          method: 'get',
+          params: this.$http.adornParams()
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            this.unitOptions = data.page.list
+          }
+        })
+      },
+      getClasses(unitId) {
+        this.classOptions = []
+        this.dataForm.classId = ''
+        this.$http({
+          url: this.$http.adornUrl(`/generator/leaveclass/list`),
+          method: 'get',
+          params: this.$http.adornParams({
+            unitId: Number(unitId)
+          })
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            this.classOptions = data.page.list
           }
         })
       }
