@@ -55,6 +55,10 @@
       userName: {
         get () { return this.$store.state.user.name },
         set (val) { this.$store.commit('user/updateName', val) }
+      },
+      roleId: {
+        get () { return this.$store.state.user.roleId },
+        set (val) { this.$store.commit('user/updateRoleId', val) }
       }
     },
     created () {
@@ -83,6 +87,13 @@
             this.userId = data.user.userId
             this.userName = data.user.username
           }
+        })
+        this.$http({
+          url: this.$http.adornUrl('/generator/leaveorder/selector'),
+          method: 'get',
+          params: this.$http.adornParams()
+        }).then(({data}) => {
+          this.roleId = data.roleId
         })
       }
     }

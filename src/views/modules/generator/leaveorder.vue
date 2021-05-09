@@ -2,27 +2,15 @@
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="getDataList()">查询</el-button>
+        <el-button type="info" icon="el-icon-refresh" @click="getDataList()" round>刷新列表</el-button>
         <el-button v-if="isAuth('generator:leaveorder:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
-        <el-button v-if="isAuth('generator:leaveorder:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
       </el-form-item>
     </el-form>
     <el-table
       :data="dataList"
       border
       v-loading="dataListLoading"
-      @selection-change="selectionChangeHandle"
       style="width: 100%;">
-      <el-table-column
-        type="selection"
-        header-align="center"
-        align="center"
-        width="50">
-      </el-table-column>
-      </el-table-column>
       <el-table-column
         prop="username"
         header-align="center"
@@ -56,6 +44,12 @@
         align="center"
         width="100"
         label="状态">
+        <template slot-scope="scope">
+					<el-tag v-if="scope.row.status < 2" size="small">待审批</el-tag>
+					<el-tag v-else-if="scope.row.status == 2" size="small" type="success">已审批</el-tag>
+					<el-tag v-else-if="scope.row.status == 3" size="small" type="danger">已拒绝</el-tag>
+					<el-tag v-else-if="scope.row.status == 4" size="small" type="info">已销假</el-tag>
+				</template>
       <!-- &&status   0：已创建；1：待审批；2.已审批；3.已拒绝；4：已销假；5：已删除 -->
       </el-table-column>
       <el-table-column
@@ -65,7 +59,10 @@
         width="150"
         label="操作">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.orderId)">修改</el-button>
+          <el-button type="text" size="small" v-if="roleId > 1 && scope.row.status < 2" @click="pass(scope.row)">通过</el-button>
+          <el-button type="text" size="small" v-if="roleId > 1 && scope.row.status < 2" @click="refuse(scope.row)">拒绝</el-button>
+          <el-button type="text" size="small" v-if="roleId == 1 && (scope.row.status == 2 || scope.row.status == 4)" @click="removeNow(scope.row)">销假</el-button>
+          <el-button type="text" size="small" v-if="roleId == 1 && scope.row.status != 2 && scope.row.status != 4" @click="addOrUpdateHandle(scope.row.orderId)">修改</el-button>
           <el-button type="text" size="small" @click="deleteHandle(scope.row.orderId)">删除</el-button>
         </template>
       </el-table-column>
@@ -97,12 +94,17 @@
         pageSize: 10,
         totalPage: 0,
         dataListLoading: false,
-        dataListSelections: [],
         addOrUpdateVisible: false
       }
     },
     components: {
       AddOrUpdate
+    },
+    computed: {
+      roleId: {
+        get () { return this.$store.state.user.roleId },
+        set (val) { this.$store.commit('user/updateRoleId', val) }
+      }
     },
     activated () {
       this.getDataList()
@@ -141,10 +143,6 @@
         this.pageIndex = val
         this.getDataList()
       },
-      // 多选
-      selectionChangeHandle (val) {
-        this.dataListSelections = val
-      },
       // 新增 / 修改
       addOrUpdateHandle (id) {
         this.addOrUpdateVisible = true
@@ -154,10 +152,8 @@
       },
       // 删除
       deleteHandle (id) {
-        var ids = id ? [id] : this.dataListSelections.map(item => {
-          return item.orderId
-        })
-        this.$confirm(`确定对[id=${ids.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+        var ids = [id]
+        this.$confirm(`确定删除[id=${id}]的请假单?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -180,6 +176,46 @@
               this.$message.error(data.msg)
             }
           })
+        })
+      },
+      pass(item) {
+        item.status = 2
+        this.updateItem(item)
+      },
+      refuse(item) {
+        item.status = 3
+        this.updateItem(item)
+      },
+      removeNow(item) {
+        item.status = 4
+        this.updateItem(item)
+      },
+      updateItem(item) {
+        this.$http({
+          url: this.$http.adornUrl(`/generator/leaveorder/update`),
+          method: 'post',
+          data: this.$http.adornData({
+            'orderId': item.orderId,
+            'username': item.username,
+            'why': item.why,
+            'startTime': item.startTime,
+            'endTime': item.endTime,
+            'status': item.status
+          })
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            this.$message({
+              message: '操作成功',
+              type: 'success',
+              duration: 1500,
+              onClose: () => {
+                this.visible = false
+                this.$emit('refreshDataList')
+              }
+            })
+          } else {
+            this.$message.error(data.msg)
+          }
         })
       }
     }
