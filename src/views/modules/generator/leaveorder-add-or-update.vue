@@ -37,6 +37,7 @@
 </template>
 
 <script>
+const DAYTIME = 86400000;
   export default {
     data () {
       return {
@@ -65,6 +66,12 @@
     computed: {
       userName: {
         get () { return this.$store.state.user.name }
+      },
+      classId: {
+        get () { return this.$store.state.user.classId }
+      },
+      unitId: {
+        get () { return this.$store.state.user.unitId }
       }
     },
     methods: {
@@ -93,15 +100,22 @@
       dataFormSubmit () {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
+            let during = 0;
+            let start = new Date(this.dataForm.startTime)
+            let end = new Date(this.dataForm.endTime)
+            during = Math.ceil((end - start) / DAYTIME)
             this.$http({
               url: this.$http.adornUrl(`/generator/leaveorder/${!this.dataForm.orderId ? 'save' : 'update'}`),
               method: 'post',
               data: this.$http.adornData({
                 'orderId': this.dataForm.orderId || undefined,
                 'username': this.userName,
+                'unitId': this.unitId,
+                'classId': this.classId,
                 'why': this.dataForm.why,
                 'startTime': this.dataForm.startTime,
                 'endTime': this.dataForm.endTime,
+                'during': during,
                 'status': 1
               })
             }).then(({data}) => {
@@ -121,6 +135,7 @@
             })
           }
         })
+      
       }
     }
   }

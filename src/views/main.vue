@@ -59,6 +59,38 @@
       roleId: {
         get () { return this.$store.state.user.roleId },
         set (val) { this.$store.commit('user/updateRoleId', val) }
+      },
+      unitId: {
+        get () { return this.$store.state.user.unitId },
+        set (val) { this.$store.commit('user/updateUnitId', val) }
+      },
+      unitName: {
+        get () { return this.$store.state.user.unitName },
+        set (val) { this.$store.commit('user/updateUnitName', val) }
+      },
+      collegeId: {
+        get () { return this.$store.state.user.collegeId },
+        set (val) { this.$store.commit('user/updateCollegeId', val) }
+      },
+      collegeName: {
+        get () { return this.$store.state.user.collegeName },
+        set (val) { this.$store.commit('user/updateCollegeName', val) }
+      },
+      classId: {
+        get () { return this.$store.state.user.classId },
+        set (val) { this.$store.commit('user/updateClassId', val) }
+      },
+      className: {
+        get () { return this.$store.state.user.className },
+        set (val) { this.$store.commit('user/updateClassName', val) }
+      },
+      adminunitId: {
+        get () { return this.$store.state.user.adminunitId },
+        set (val) { this.$store.commit('user/updateAdminunitId', val) }
+      },
+      adminunitName: {
+        get () { return this.$store.state.user.adminunitName },
+        set (val) { this.$store.commit('user/updateAdminunitName', val) }
       }
     },
     created () {
@@ -86,6 +118,14 @@
             this.loading = false
             this.userId = data.user.userId
             this.userName = data.user.username
+            this.unitId = data.user.unitId || 0
+            this.unitName = data.user.unitName || ''
+            this.collegeId = data.user.collegeId || 0
+            this.collegeName = data.user.collegeName || ''
+            this.classId = data.user.classId || 0
+            this.className = data.user.className || ''
+            this.adminunitId = data.user.adminunitId || 0
+            this.adminunitName = data.user.adminunitName || ''
           }
         })
         this.$http({

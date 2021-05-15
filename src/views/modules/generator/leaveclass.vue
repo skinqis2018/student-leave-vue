@@ -29,16 +29,22 @@
         label="班级ID">
       </el-table-column>
       <el-table-column
+        prop="unitName"
+        header-align="center"
+        align="center"
+        label="所属学院">
+      </el-table-column>
+      <el-table-column
+        prop="collegeName"
+        header-align="center"
+        align="center"
+        label="所属专业">
+      </el-table-column>
+      <el-table-column
         prop="className"
         header-align="center"
         align="center"
         label="班级名">
-      </el-table-column>
-      <el-table-column
-        prop="unitName"
-        header-align="center"
-        align="center"
-        label="院系名">
       </el-table-column>
       <el-table-column
         prop="createTime"
