@@ -56,9 +56,9 @@
         get () { return this.$store.state.user.name },
         set (val) { this.$store.commit('user/updateName', val) }
       },
-      roleId: {
-        get () { return this.$store.state.user.roleId },
-        set (val) { this.$store.commit('user/updateRoleId', val) }
+      roleList: {
+        get () { return this.$store.state.user.roleList },
+        set (val) { this.$store.commit('user/updateRoleList', val) }
       },
       unitId: {
         get () { return this.$store.state.user.unitId },
@@ -133,7 +133,7 @@
           method: 'get',
           params: this.$http.adornParams()
         }).then(({data}) => {
-          this.roleId = data.roleId
+          this.roleList = data.roleList
         })
       }
     }

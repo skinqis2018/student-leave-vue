@@ -3,7 +3,7 @@ export default {
   state: {
     id: 0,
     name: '',
-    roleId: 0,
+    roleList: [],
     unitId: 0,
     unitName: '',
     collegeId: 0,
@@ -20,8 +20,8 @@ export default {
     updateName (state, name) {
       state.name = name
     },
-    updateRoleId (state, id) {
-      state.roleId = id
+    updateRoleList (state, list) {
+      state.roleList = list
     },
     updateUnitId (state, id) {
       state.unitId = id

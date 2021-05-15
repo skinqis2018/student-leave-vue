@@ -59,10 +59,10 @@
         width="150"
         label="操作">
         <template slot-scope="scope">
-          <el-button type="text" size="small" v-if="roleId > 1 && scope.row.status < 2" @click="pass(scope.row)">通过</el-button>
-          <el-button type="text" size="small" v-if="roleId > 1 && scope.row.status < 2" @click="refuse(scope.row)">拒绝</el-button>
-          <el-button type="text" size="small" v-if="roleId == 1 && (scope.row.status == 2 || scope.row.status == 4)" @click="removeNow(scope.row)">销假</el-button>
-          <el-button type="text" size="small" v-if="roleId == 1 && scope.row.status != 2 && scope.row.status != 4" @click="addOrUpdateHandle(scope.row.orderId)">修改</el-button>
+          <el-button type="text" size="small" v-if="!isStudent() && scope.row.status < 2" @click="pass(scope.row)">通过</el-button>
+          <el-button type="text" size="small" v-if="!isStudent() && scope.row.status < 2" @click="refuse(scope.row)">拒绝</el-button>
+          <el-button type="text" size="small" v-if="isStudent() && (scope.row.status == 2 || scope.row.status == 4)" @click="removeNow(scope.row)">销假</el-button>
+          <el-button type="text" size="small" v-if="isStudent() && scope.row.status != 2 && scope.row.status != 4" @click="addOrUpdateHandle(scope.row.orderId)">修改</el-button>
           <el-button type="text" size="small" @click="deleteHandle(scope.row.orderId)">删除</el-button>
         </template>
       </el-table-column>
@@ -101,9 +101,9 @@
       AddOrUpdate
     },
     computed: {
-      roleId: {
-        get () { return this.$store.state.user.roleId },
-        set (val) { this.$store.commit('user/updateRoleId', val) }
+      roleList: {
+        get () { return this.$store.state.user.roleList },
+        set (val) { this.$store.commit('user/updateRoleList', val) }
       }
     },
     activated () {
@@ -217,6 +217,15 @@
             this.$message.error(data.msg)
           }
         })
+      },
+      isStudent() {
+        return this.roleList.includes(1)
+      },
+      isTeacher() {
+        return this.roleList.includes(2)
+      },
+      isLeader() {
+        return this.roleList.includes(3)
       }
     }
   }
