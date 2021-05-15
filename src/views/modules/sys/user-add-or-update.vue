@@ -16,10 +16,10 @@
       <el-form-item label="姓名" prop="name">
         <el-input v-model="dataForm.name" placeholder="姓名"></el-input>
       </el-form-item>
-      <el-form-item v-if="isStudent()" label="学号" prop="studentNo">
+      <el-form-item v-show="isStudent()" label="学号">
         <el-input v-model="dataForm.studentNo" placeholder="学号"></el-input>
       </el-form-item>
-      <el-form-item v-if="isStudent()" label="宿舍号" prop="roomNo">
+      <el-form-item v-show="isStudent()" label="宿舍号">
         <el-input v-model="dataForm.roomNo" placeholder="宿舍号"></el-input>
       </el-form-item>
       <el-form-item label="手机号" prop="mobile">
@@ -167,6 +167,7 @@
     },
     methods: {
       init (id) {
+        this.getUnits()
         this.dataForm.id = id || 0
         this.$http({
           url: this.$http.adornUrl('/sys/role/select'),
@@ -178,6 +179,22 @@
           this.visible = true
           this.$nextTick(() => {
             this.$refs['dataForm'].resetFields()
+            if (!id) {
+              this.unitOptions = []
+              this.collegeOptions = []
+              this.classOptions = []
+              this.dataForm.unitId = null
+              this.dataForm.collegeId = null
+              this.dataForm.classId = null
+              this.dataForm.adminunitId = null
+              this.dataForm.unitName = null
+              this.dataForm.collegeName = null
+              this.dataForm.className = null
+              this.dataForm.adminunitName = null
+              this.dataForm.name = null
+              this.dataForm.studentNo = null
+              this.dataForm.roomNo = null
+            }
           })
         }).then(() => {
           if (this.dataForm.id) {
@@ -187,6 +204,12 @@
               params: this.$http.adornParams()
             }).then(({data}) => {
               if (data && data.code === 0) {
+                if (data.user.unitId) {
+                  this.getCollege(data.user.unitId)
+                }
+                if (data.user.collegeId) {
+                  this.getClasses(data.user.collegeId)
+                }
                 this.dataForm.userName = data.user.username
                 this.dataForm.salt = data.user.salt
                 this.dataForm.email = data.user.email
@@ -208,7 +231,6 @@
             })
           }
         })
-        this.getUnits()
       },
       // 表单提交
       dataFormSubmit () {

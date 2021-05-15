@@ -4,8 +4,10 @@
     :close-on-click-modal="false"
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
-    <el-form-item label="阈值" prop="duringValue">
-      <el-input v-model="dataForm.duringValue" placeholder="阈值"></el-input>
+    <el-form-item label="审批阈值" prop="duringValue">
+      <el-input v-model="dataForm.duringValue" placeholder="审批阈值">
+        <template slot="append">天</template>
+      </el-input>
     </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">

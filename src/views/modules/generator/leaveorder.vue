@@ -42,15 +42,17 @@
         prop="status"
         header-align="center"
         align="center"
-        width="100"
+        width="120"
         label="状态">
         <template slot-scope="scope">
 					<el-tag v-if="scope.row.status < 2" size="small">待审批</el-tag>
-					<el-tag v-else-if="scope.row.status == 2" size="small" type="success">已审批</el-tag>
-					<el-tag v-else-if="scope.row.status == 3" size="small" type="danger">已拒绝</el-tag>
-					<el-tag v-else-if="scope.row.status == 4" size="small" type="info">已销假</el-tag>
+					<el-tag v-else-if="scope.row.status == 2" size="small" type="success">班主任已审批</el-tag>
+					<el-tag v-else-if="scope.row.status == 4" size="small" type="success">已通过</el-tag>
+					<el-tag v-else-if="scope.row.status == 3 || scope.row.status == 5" size="small" type="danger">已拒绝</el-tag>
+					<el-tag v-else-if="scope.row.status == 6" size="small" type="info">已销假</el-tag>
 				</template>
       <!-- &&status   0：已创建；1：待审批；2.已审批；3.已拒绝；4：已销假；5：已删除 -->
+      <!-- &&status   0：已创建；1：待审批；2.一级已审批；3.已拒绝；4：二级已审批；5：二级已拒绝；6：已销假；7：已删除' -->
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -59,8 +61,8 @@
         width="150"
         label="操作">
         <template slot-scope="scope">
-          <el-button type="text" size="small" v-if="!isStudent() && scope.row.status < 2" @click="pass(scope.row)">通过</el-button>
-          <el-button type="text" size="small" v-if="!isStudent() && scope.row.status < 2" @click="refuse(scope.row)">拒绝</el-button>
+          <el-button type="text" size="small" v-if="canipass(scope.row)" @click="pass(scope.row)">通过</el-button>
+          <el-button type="text" size="small" v-if="canipass(scope.row)" @click="refuse(scope.row)">拒绝</el-button>
           <el-button type="text" size="small" v-if="isStudent() && (scope.row.status == 2 || scope.row.status == 4)" @click="removeNow(scope.row)">销假</el-button>
           <el-button type="text" size="small" v-if="isStudent() && scope.row.status != 2 && scope.row.status != 4" @click="addOrUpdateHandle(scope.row.orderId)">修改</el-button>
           <el-button type="text" size="small" @click="deleteHandle(scope.row.orderId)">删除</el-button>
@@ -94,7 +96,8 @@
         pageSize: 10,
         totalPage: 0,
         dataListLoading: false,
-        addOrUpdateVisible: false
+        addOrUpdateVisible: false,
+        duringNum: 0
       }
     },
     components: {
@@ -112,6 +115,7 @@
     methods: {
       // 获取数据列表
       getDataList () {
+        this.getDuringNum()
         this.dataListLoading = true
         this.$http({
           url: this.$http.adornUrl('/generator/leaveorder/list'),
@@ -179,15 +183,37 @@
         })
       },
       pass(item) {
-        item.status = 2
+        if (this.isLeader()) {
+          let adminunitId = this.$store.state.user.adminunitId
+          if (item.unitId == adminunitId) {
+            item.status = 4
+            this.updateItem(item)
+            return
+          }
+        }
+        debugger
+        if (this.isHighLvl(item.during)) {
+          item.status = 2
+          this.updateItem(item)
+          return
+        }
+        item.status = 4
         this.updateItem(item)
       },
       refuse(item) {
+        if (this.isLeader()) {
+          let adminunitId = this.$store.state.user.adminunitId
+          if (item.unitId == adminunitId) {
+            item.status = 5
+            this.updateItem(item)
+            return
+          }
+        }
         item.status = 3
         this.updateItem(item)
       },
       removeNow(item) {
-        item.status = 4
+        item.status = 6
         this.updateItem(item)
       },
       updateItem(item) {
@@ -226,6 +252,39 @@
       },
       isLeader() {
         return this.roleList.includes(3)
+      },
+      isHighLvl(during) {
+        return Number(during) > Number(this.duringNum)
+      },
+      getDuringNum() {
+        this.$http({
+          url: this.$http.adornUrl('/generator/leaveduring/info/1'),
+          method: 'get',
+          params: this.$http.adornParams()
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            this.duringNum = data.leaveDuring.duringValue
+          } else {
+          }
+        })
+      },
+      canipass(item) {
+        if (this.isStudent()) {
+          return false
+        }
+        if (this.isLeader()) {
+          let adminunitId = this.$store.state.user.adminunitId
+          if (item.unitId == adminunitId && item.status < 4) {
+            return true
+          }
+        }
+        if (this.isTeacher()) {
+          let classId = this.$store.state.user.classId
+          if (item.classId == classId && item.status < 2) {
+            return true
+          }
+        }
+        return false
       }
     }
   }

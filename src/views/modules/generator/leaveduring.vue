@@ -7,7 +7,7 @@
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
         <el-button v-if="isAuth('generator:leaveduring:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
-        <el-button v-if="isAuth('generator:leaveduring:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <el-button v-if="isAuth('generator:leaveduring:update')" type="info" @click="addOrUpdateHandle(1)">修改</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -17,24 +17,12 @@
       @selection-change="selectionChangeHandle"
       style="width: 100%;">
       <el-table-column
-        type="selection"
-        header-align="center"
-        align="center"
-        width="50">
-      </el-table-column>
-      <el-table-column
-        prop="duringId"
-        header-align="center"
-        align="center"
-        label="">
-      </el-table-column>
-      <el-table-column
         prop="duringValue"
         header-align="center"
         align="center"
-        label="阈值">
+        label="审批阈值（天）">
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         fixed="right"
         header-align="center"
         align="center"
@@ -42,19 +30,9 @@
         label="操作">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.duringId)">修改</el-button>
-          <el-button type="text" size="small" @click="deleteHandle(scope.row.duringId)">删除</el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
-    <el-pagination
-      @size-change="sizeChangeHandle"
-      @current-change="currentChangeHandle"
-      :current-page="pageIndex"
-      :page-sizes="[10, 20, 50, 100]"
-      :page-size="pageSize"
-      :total="totalPage"
-      layout="total, sizes, prev, pager, next, jumper">
-    </el-pagination>
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
   </div>

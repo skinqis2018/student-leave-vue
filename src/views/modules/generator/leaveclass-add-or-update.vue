@@ -66,6 +66,8 @@
     },
     methods: {
       init (id) {
+        this.getUnit()
+        this.getCollege()
         this.dataForm.classId = id || 0
         this.visible = true
         this.$nextTick(() => {
@@ -77,6 +79,9 @@
               params: this.$http.adornParams()
             }).then(({data}) => {
               if (data && data.code === 0) {
+                if (data.leaveClass.unitId) {
+                  this.unitChange(data.leaveClass.unitId)
+                }
                 this.dataForm.className = data.leaveClass.className
                 this.dataForm.collegeId = data.leaveClass.collegeId
                 this.dataForm.collegeName = data.leaveClass.collegeName
@@ -86,8 +91,6 @@
             })
           }
         })
-        this.getUnit()
-        this.getCollege()
       },
       // 表单提交
       dataFormSubmit () {
@@ -153,11 +156,7 @@
       unitChange(v) {
         this.dataForm.unitName = this.unitOptions.find(i => i.unitId === v).unitName
         let tempArr = []
-        tempArr = this.allCollege.map(i => {
-          if (i.unitId === v) {
-            return i
-          }
-        })
+        tempArr = this.allCollege.filter(i => i.unitId === v)
         if (tempArr.length === 0 || (tempArr.length ===1 && tempArr[0] === void(0))) {
           this.$message({
             message: '请先添加对应的专业',
